@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: Devops
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: Devops
+  template:
+    metadata:
+      labels:
+        app: Devops
+    spec:
+      containers:
+      - name: Devops
+        image: your-dockerhub-username/your-app:latest
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name:  Devops-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: Devops
