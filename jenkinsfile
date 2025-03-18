@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+    environment {
+        DOCKER_CREDENTIALS = credentials('DOCKER_CREDENTIALS')
+        KUBECONFIG = credentials('K8S_CREDENTIALS')
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'  // Replace with your build command
+            }
+        }
+        stage('Dockerize') {
+            steps {
+                sh 'docker build -t your-dockerhub-username/your-app:latest .'
+                sh 'docker login -u $DOCKER_CREDENTIALS_USR -p $DOCKER_CREDENTIALS_PSW'
+                sh 'docker push your-dockerhub-username/your-app:latest'
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh 'kubectl apply -f k8s-deployment.yaml'
+            }
+        }
+    }
+}
