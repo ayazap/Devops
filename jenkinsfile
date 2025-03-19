@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKER_CREDENTIALS = credentials('DOCKER_CREDENTIALS')
-        KUBECONFIG = credentials('K8S_CREDENTIALS')
+        K8S_CREDENTIALS = credentials('K8S_CREDENTIALS')
     }
     stages {
         stage('Build') {
