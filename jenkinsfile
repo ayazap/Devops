@@ -3,23 +3,33 @@ pipeline {
     environment {
         DOCKER_CREDENTIALS = credentials('DOCKER_CREDENTIALS')
         K8S_CREDENTIALS = credentials('K8S_CREDENTIALS')
+        IMAGE_NAME = "ayaz5/your-app:latest"  // Change this to your actual DockerHub repo
     }
     stages {
         stage('Build') {
             steps {
-                sh 'mvn clean package'  // Replace with your build command
+                sh 'mvn clean package' 
             }
         }
         stage('Dockerize') {
             steps {
-                sh 'docker build -t your-dockerhub-username/your-app:latest .'
-                sh 'docker login -u $DOCKER_CREDENTIALS_USR -p $DOCKER_CREDENTIALS_PSW'
-                sh 'docker push ayaz5/your-app:latest'
+                withCredentials([usernamePassword(credentialsId: 'DOCKER_CREDENTIALS', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                    docker build -t $IMAGE_NAME .
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker push $IMAGE_NAME
+                    '''
+                }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f k8s-deployment.yaml'
+                withCredentials([string(credentialsId: 'K8S_CREDENTIALS', variable: 'KUBE_TOKEN')]) {
+                    sh '''
+                    kubectl config set-credentials jenkins-user --token=$KUBE_TOKEN
+                    kubectl apply -f k8s-deployment.yaml
+                    '''
+                }
             }
         }
     }
