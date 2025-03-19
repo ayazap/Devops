@@ -1,32 +1,38 @@
 pipeline {
     agent any
-    environment {
-        IMAGE_NAME = "ayaz5/your-app:latest"  // Update with your actual DockerHub repo
-    }
     stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/ayazap/Devops.git'
+            }
+        }
         stage('Build') {
             steps {
-                sh 'mvn clean package' 
+                sh 'mvn clean package'
             }
         }
         stage('Dockerize') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'DOCKER_CREDENTIALS', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                    docker build -t $IMAGE_NAME .
-                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                    docker push $IMAGE_NAME
-                    '''
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'DOCKER_CREDENTIALS', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh '''
+                            docker build -t ayaz5/your-app:latest .
+                            docker login -u $DOCKER_USER -p $DOCKER_PASS
+                            docker push ayaz5/your-app:latest
+                        '''
+                    }
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([string(credentialsId: 'k8s-token', variable: 'KUBE_TOKEN')]) {
-                    sh '''
-                    kubectl config set-credentials jenkins-user --token=$KUBE_TOKEN
-                    kubectl apply -f k8s-deployment.yaml
-                    '''
+                script {
+                    withCredentials([string(credentialsId: 'k8s-token', variable: 'K8S_TOKEN')]) {
+                        sh '''
+                            echo "Using Kubernetes token: $K8S_TOKEN"
+                            kubectl --token=$K8S_TOKEN apply -f k8s-deployment.yaml
+                        '''
+                    }
                 }
             }
         }
