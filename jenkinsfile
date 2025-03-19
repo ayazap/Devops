@@ -14,7 +14,7 @@ pipeline {
             steps {
                 sh 'docker build -t your-dockerhub-username/your-app:latest .'
                 sh 'docker login -u $DOCKER_CREDENTIALS_USR -p $DOCKER_CREDENTIALS_PSW'
-                sh 'docker push your-dockerhub-username/your-app:latest'
+                sh 'docker push ayaz5/your-app:latest'
             }
         }
         stage('Deploy to Kubernetes') {
