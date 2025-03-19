@@ -1,9 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_CREDENTIALS = credentials('DOCKER_CREDENTIALS')
-        k8s-token = token('k8s-token')
-        IMAGE_NAME = "ayaz5/your-app:latest"  // Change this to your actual DockerHub repo
+        IMAGE_NAME = "ayaz5/your-app:latest"  // Update with your actual DockerHub repo
     }
     stages {
         stage('Build') {
