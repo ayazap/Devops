@@ -1,11 +1,9 @@
 pipeline {
     agent any
+    environment {
+        IMAGE_NAME = "ayaz5/your-app:latest"
+    }
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/ayazap/Devops.git'
-            }
-        }
         stage('Build') {
             steps {
                 sh 'mvn clean package'
@@ -13,26 +11,22 @@ pipeline {
         }
         stage('Dockerize') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'DOCKER_CREDENTIALS', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh '''
-                            docker build -t ayaz5/your-app:latest .
-                            docker login -u $DOCKER_USER -p $DOCKER_PASS
-                            docker push ayaz5/your-app:latest
-                        '''
-                    }
+                withCredentials([usernamePassword(credentialsId: 'DOCKER_CREDENTIALS', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                    docker build -t $IMAGE_NAME .
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker push $IMAGE_NAME
+                    '''
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                script {
-                    withCredentials([string(credentialsId: 'k8s-token', variable: 'K8S_TOKEN')]) {
-                        sh '''
-                            echo "Using Kubernetes token: $K8S_TOKEN"
-                            kubectl --token=$K8S_TOKEN apply -f k8s-deployment.yaml
-                        '''
-                    }
+                withCredentials([string(credentialsId: 'k8s-token', variable: 'K8S_TOKEN')]) {
+                    sh '''
+                    kubectl config set-credentials jenkins-user --token=$K8S_TOKEN
+                    kubectl apply -f k8s-deployment.yaml
+                    '''
                 }
             }
         }
