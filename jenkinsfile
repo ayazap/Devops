@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKER_CREDENTIALS = credentials('DOCKER_CREDENTIALS')
-        K8S_CREDENTIALS = credentials('K8S_CREDENTIALS')
+        k8s-token = credentials('k8s-token')
         IMAGE_NAME = "ayaz5/your-app:latest"  // Change this to your actual DockerHub repo
     }
     stages {
@@ -24,7 +24,7 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([string(credentialsId: 'K8S_CREDENTIALS', variable: 'KUBE_TOKEN')]) {
+                withCredentials([string(credentialsId: 'k8s-token', variable: 'KUBE_TOKEN')]) {
                     sh '''
                     kubectl config set-credentials jenkins-user --token=$KUBE_TOKEN
                     kubectl apply -f k8s-deployment.yaml
