@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         IMAGE_NAME = "ayaz5/your-app:latest"
-        K8S_CLUSTER_NAME = "your-cluster-name"
+        K8S_CLUSTER_NAME = "my-cluster"
         K8S_API_SERVER = "https://889D7D61CBE662FE8FC9FB6A947C719F.gr7.ap-southeast-1.eks.amazonaws.com"
     }
     stages {
@@ -24,25 +24,18 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([string(credentialsId: 'K8S_TOKEN', variable: 'K8S_TOKEN')]) {
+                withCredentials([file(credentialsId: 'KUBECONFIG_FILE', variable: 'KUBECONFIG')]) {
                     sh '''
-            # Set cluster configuration
-                    kubectl config set-cluster my-cluster --server=https://889D7D61CBE662FE8FC9FB6A947C719F.gr7.ap-southeast-1.eks.amazonaws.com
+                    export KUBECONFIG=$KUBECONFIG
 
-            # Set user credentials
-                    kubectl config set-credentials jenkins-user --token=$K8S_TOKEN
+                    # Verify Cluster Connection
+                    kubectl get nodes
 
-            # Set context
-                    kubectl config set-context my-context --cluster=my-cluster --user=jenkins-user
-
-            # Use the context
-                    kubectl config use-context my-context
-
-            # Deploy to Kubernetes
+                    # Deploy to Kubernetes
                     kubectl apply -f kubernetes-deployment.yaml
                     '''
+                }
             }
-         }
-     }
-   }
- }
+        }
+    }
+}
