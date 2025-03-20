@@ -23,17 +23,24 @@ pipeline {
             }
         }
         stage('Deploy to Kubernetes') {
-            steps {
-                withCredentials([string(credentialsId: 'k8s-token', variable: 'K8S_TOKEN')]) {
-                    sh '''
-                    kubectl config set-credentials jenkins-user --token=$K8S_TOKEN
-                    kubectl config set-cluster $K8S_CLUSTER_NAME --server=$K8S_API_SERVER --insecure-skip-tls-verify=true
-                    kubectl config set-context jenkins-context --cluster=$K8S_CLUSTER_NAME --user=jenkins-user
-                    kubectl config use-context jenkins-context
-                    kubectl apply -f k8s-deployment.yaml
-                    '''
-                }
-            }
-        }
-    }
-}
+    withCredentials([string(credentialsId: 'K8S_TOKEN', variable: 'K8S_TOKEN')]) {
+        sh '''
+            # Set cluster configuration
+            kubectl config set-cluster my-cluster --server=https://889D7D61CBE662FE8FC9FB6A947C719F.gr7.ap-southeast-1.eks.amazonaws.com
+
+            # Set user credentials
+            kubectl config set-credentials jenkins-user --token=$K8S_TOKEN
+
+            # Set context
+            kubectl config set-context my-context --cluster=my-cluster --user=jenkins-user
+
+            # Use the context
+            kubectl config use-context my-context
+
+            # Deploy to Kubernetes
+            kubectl apply -f kubernetes-deployment.yaml
+        '''
+         }
+     }
+   }
+ }
