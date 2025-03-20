@@ -26,10 +26,18 @@ pipeline {
             steps {
                withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'KUBECONFIG')]) {
                     sh '''
-                        export KUBECONFIG=${KUBECONFIG}
-                        kubectl apply -f kubernetes-deployment.yaml
+                    export KUBECONFIG=$KUBECONFIG
+
+    # Authenticate with AWS EKS
+                    aws eks update-kubeconfig --region ap-southeast-1 --name my-cluster
+
+    # Verify connection
+                    kubectl get nodes
+
+    # Deploy to Kubernetes
+                    kubectl apply -f kubernetes-deployment.yaml
                     '''
-                }
+             }
 
             }
         }
