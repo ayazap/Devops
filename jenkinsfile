@@ -24,9 +24,9 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: 'KUBECONFIG_FILE', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig-file', variable: 'kubeconfig')]) {
                     sh '''
-                    export KUBECONFIG=$KUBECONFIG
+                    export kubeconfig=$kubeconfigIG
 
                     # Verify Cluster Connection
                     kubectl get nodes
