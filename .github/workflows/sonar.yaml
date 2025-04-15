@@ -31,4 +31,4 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Run SonarQube Scan
-        run: mvn verify sonar:sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        run: mvn verify sonar:sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }} -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
