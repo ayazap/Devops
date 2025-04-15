@@ -19,11 +19,7 @@ jobs:
           distribution: 'temurin'
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v2.0.0
-        with:
-          args: >
-            -Dsonar.projectKey=Sample
-            -Dsonar.projectName=Sample
+        uses: SonarSource/sonarqube-scan-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: http://localhost:9000
+          SONAR_HOST_URL: http://$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}'):9000
