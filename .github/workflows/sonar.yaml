@@ -22,4 +22,4 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: http://$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}'):9000
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
